@@ -71,6 +71,7 @@ class Calculator {
 
   display() {
     const outputNumber = this._output === '' ? '' : +this._output;
+    this._output = this._output.slice(0, 10);
     this._outputScreen.textContent = this._output;
     // outputNumber.toLocaleString('en', {
     //   maximumFractionDigits: 4,
