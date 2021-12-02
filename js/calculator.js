@@ -11,7 +11,8 @@ class Calculator {
   }
 
   deleteOne() {
-    this._output = this._output.slice(0, -1);
+    console.log(`${this._output}`.trim());
+    this._output = this._output.trim().slice(0, -1);
   }
 
   appendNumbers(number) {
@@ -19,9 +20,10 @@ class Calculator {
 
     if (number.includes('0') && this._output === '0') return;
 
-    this._output === '0'
-      ? (this._output = number.trim())
-      : (this._output += number.trim());
+    if (this._output === '0' && !number.includes('.'))
+      this._output = number.trim();
+    else if (number.includes('.') && !this._output) this._output = '0.';
+    else this._output += number.trim();
   }
 
   setOperator(operator) {
@@ -29,33 +31,38 @@ class Calculator {
 
     this._compute();
 
+    if (!this._compute() && this._operator)
+      this._output = this._output.replace(this._operator, '');
+
     this._operator = operator.trim();
 
     this._output
       ? (this._output += ` ${operator.trim()} `)
       : (this._output += operator.trim());
-
-    console.log(this._output);
   }
 
   _compute() {
     const [prevOperand, curOperand] = this._output.split(this._operator);
 
-    if (prevOperand?.trim() === '' || curOperand?.trim() === '') return;
-    console.log(prevOperand, curOperand, this._operator.trim());
+    const prev = parseFloat(prevOperand);
+    const cur = parseFloat(curOperand);
+    console.log(cur, prev, this._operator.trim());
+
+    if (isNaN(cur) || isNaN(prev)) return false;
 
     switch (this._operator.trim()) {
       case '+':
-        this._output = +prevOperand + +curOperand;
+        this._output = `${prev + cur}`;
         break;
       case '-':
-        this._output = +prevOperand - +curOperand;
+        this._output = `${prev - cur}`;
         break;
       case 'x':
-        this._output = +prevOperand * +curOperand;
+        this._output = `${prev * cur}`;
         break;
       case '/':
-        this._output = +prevOperand / +curOperand;
+        if (cur === 0) return;
+        else this._output = `${prev / cur}`;
         break;
       default:
         return;
@@ -63,15 +70,19 @@ class Calculator {
   }
 
   display() {
+    const outputNumber = this._output === '' ? '' : +this._output;
     this._outputScreen.textContent = this._output;
+    // outputNumber.toLocaleString('en', {
+    //   maximumFractionDigits: 4,
+    // });
   }
 
-  updateDisplay(reset = true) {
+  updateDisplay() {
     this._compute();
 
     this.display();
 
-    if (isFinite(this._output) || reset) this._output = '';
+    if (isFinite(this._output)) this._output = '';
   }
 }
 
